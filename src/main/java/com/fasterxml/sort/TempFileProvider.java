@@ -12,5 +12,5 @@ import java.io.IOException;
  */
 public interface TempFileProvider
 {
-    public File provide(String prefix, String suffix) throws IOException;
+    public File provide() throws IOException;
 }

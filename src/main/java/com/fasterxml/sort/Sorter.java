@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.fasterxml.sort.util.SegmentedBuffer;
+
 /**
  * Main entry point for sorting functionality; object that drives
  * the sorting process from pre-sort to final output.
@@ -14,6 +16,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Sorter<T>
     implements SortingState
 {
+    /* each entry (in buffer) takes about 4 bytes on 32-bit machine; but let's be
+     * conservative and use 8 as base, plus size of object itself.
+     */
+    private final static long ENTRY_SLOT_SIZE = 8L;
+    
     /*
     /********************************************************************** 
     /* Configuration
@@ -22,8 +29,14 @@ public class Sorter<T>
     
     protected final SortConfig _config;
     
+    /**
+     * Factory used for reading intermediate sorted files.
+     */
     protected final DataReaderFactory<T> _readerFactory;
     
+    /**
+     * Factory used for writing intermediate sorted files.
+     */
     protected final DataWriterFactory<T> _writerFactory;
 
     protected final Comparator<T> _comparator;
@@ -140,22 +153,65 @@ public class Sorter<T>
      * Conversions to and from intermediate sort files is done
      * using {@link DataReaderFactory} and {@link DataWriterFactory} configured
      * for this sorter.
+     * 
+     * @return true if sorting completed succesfully; false if it was cancelled
      */
-    public void sort(DataReader<T>  inputReader, DataWriter<T> resultWriter)
+    public boolean sort(DataReader<T>  inputReader, DataWriter<T> resultWriter)
         throws IOException
     {
         // First, pre-sort:
         _phase = SortingState.Phase.PRE_SORTING;
-        Collection<File> presorted = presort(inputReader);
-        if (_checkForCancel()) {
-            return;
+
+        /* Minor optimization: in case all entries might fit in
+         * in-memory sort buffer, avoid writing intermediate file
+         * and just write results directly.
+         */
+        SegmentedBuffer buffer = new SegmentedBuffer();
+        boolean inputClosed = false;
+        boolean resultClosed = false;
+        try {
+            Object[] items = _readMax(inputReader, buffer, _config.getMaxMemoryUsage(), null);
+            if (_checkForCancel()) {
+                return false;
+            }
+            Arrays.sort(items, _rawComparator());
+            T next = inputReader.readNext();
+            if (next == null) {
+                inputClosed = true;
+                inputReader.close();
+                _phase = SortingState.Phase.SORTING;
+                _writeAll(resultWriter, items);
+            } else {
+                // but if more data than memory-buffer-full, do it right:
+                Collection<File> presorted = presort(inputReader, buffer, items, next);
+                inputClosed = true;
+                inputReader.close();
+                _phase = SortingState.Phase.SORTING;
+                if (_checkForCancel(presorted)) {
+                    return false;
+                }
+                merge(presorted, resultWriter);
+                // !!! TODO
+            }
+            resultClosed = true;
+            resultWriter.close();
+            if (_checkForCancel()) {
+                return false;
+            }
+            _phase = SortingState.Phase.COMPLETE;
+        } finally {
+            if (!inputClosed) {
+                try {
+                    inputReader.close();
+                } catch (IOException e) { }
+            }
+            if (!resultClosed) {
+                try {
+                    resultWriter.close();
+                } catch (IOException e) { }
+            }
         }
-        _phase = SortingState.Phase.SORTING;
-        merge(presorted, resultWriter);
-        if (_checkForCancel()) {
-            return;
-        }
-        _phase = SortingState.Phase.COMPLETE;
+        return false;
     }
     
     /*
@@ -164,16 +220,78 @@ public class Sorter<T>
     /********************************************************************** 
      */
 
-    protected Collection<File> presort(DataReader<T> inputReader) throws IOException
+    /**
+     * Helper method that will fill given buffer with data read using
+     * given reader, obeying given memory usage constraints.
+     */
+    private Object[] _readMax(DataReader<T> inputReader, SegmentedBuffer buffer,
+            long memoryToUse, T firstItem)
+        throws IOException
     {
-        ArrayList<File> result = new ArrayList<File>();
-        // !!! TBI
-        return result;
+        // how much memory do we expect largest remaining entry to take?
+        int ptr = 0;
+        Object[] segment = buffer.resetAndStart();
+        int segmentLength = segment.length;
+        long minMemoryNeeded;
+
+        if (firstItem != null) {
+            segment[ptr++] = firstItem;
+            long firstSize = ENTRY_SLOT_SIZE + inputReader.estimateSizeInBytes(firstItem);
+            minMemoryNeeded = Math.max(firstSize, 256L);
+        } else  {
+            minMemoryNeeded = 256L;
+        }
+        
+        while (true) {
+            T value = inputReader.readNext();
+            if (value == null) {
+                break;
+            }
+            long size = ENTRY_SLOT_SIZE + inputReader.estimateSizeInBytes(value);
+            if (size > minMemoryNeeded) {
+                minMemoryNeeded = size;
+            }
+            if (ptr >= segmentLength) {
+                segment = buffer.appendCompletedChunk(segment);
+                ptr = 0;
+            }
+            segment[ptr++] = value;
+            if ((memoryToUse -= size) < minMemoryNeeded) {
+                break;
+            }
+        }
+        return buffer.completeAndClearBuffer(segment, ptr);
+    }
+    
+    protected Collection<File> presort(DataReader<T> inputReader,
+            SegmentedBuffer buffer,
+            Object[] firstSortedBatch, T nextValue) throws IOException
+    {
+        ArrayList<File> presorted = new ArrayList<File>();
+        presorted.add(_writePresorted(firstSortedBatch));
+        do {
+            Object[] items = _readMax(inputReader, buffer, _config.getMaxMemoryUsage(), nextValue);
+            Arrays.sort(items, _rawComparator());
+            presorted.add(_writePresorted(items));
+        } while (nextValue != null);
+        return presorted;
     }
 
+    protected File _writePresorted(Object[] items) throws IOException
+    {
+        File tmp = _config.getTempFileProvider().provide();
+        @SuppressWarnings("unchecked")
+        DataWriter<Object> writer = (DataWriter<Object>) _writerFactory.constructWriter(new FileOutputStream(tmp));
+        for (Object item : items) {
+            writer.writeEntry(item);
+        }
+        writer.close();
+        return tmp;
+    }
+    
     /*
     /********************************************************************** 
-    /* Internal methods, sorting
+    /* Internal methods, sorting, output
     /********************************************************************** 
      */
 
@@ -181,6 +299,17 @@ public class Sorter<T>
         throws IOException
     {
         // !!! TBI
+    }
+
+    protected void _writeAll(DataWriter<T> resultWriter, Object[] items)
+        throws IOException
+    {
+        // need to go through acrobatics, due to type erasure... works, if ugly:
+        @SuppressWarnings("unchecked")
+        DataWriter<Object> writer = (DataWriter<Object>) resultWriter;
+        for (Object item : items) {
+            writer.writeEntry(item);
+        }
     }
     
     /*
@@ -191,8 +320,18 @@ public class Sorter<T>
     
     protected boolean _checkForCancel() throws IOException
     {
+        return _checkForCancel(null);
+    }
+
+    protected boolean _checkForCancel(Collection<File> tmpFilesToDelete) throws IOException
+    {
         if (!_cancelRequest.get()) {
             return false;
+        }
+        if (tmpFilesToDelete != null) {
+            for (File f : tmpFilesToDelete) {
+                f.delete();
+            }
         }
         if (_cancelForException != null) {
             // can only be an IOException or RuntimeException, so
@@ -202,5 +341,10 @@ public class Sorter<T>
             throw (IOException) _cancelForException;
         }
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Comparator<Object> _rawComparator() {
+        return (Comparator<Object>) _comparator;
     }
 }

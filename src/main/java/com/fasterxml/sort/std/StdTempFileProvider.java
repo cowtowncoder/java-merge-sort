@@ -13,12 +13,29 @@ import com.fasterxml.sort.TempFileProvider;
 public class StdTempFileProvider
     implements TempFileProvider
 {
-    public StdTempFileProvider() { }
+    /**
+     * Default temporary file prefix to use.
+     */
+    public final static String DEFAULT_PREFIX = "j-merge-sort-";
+
+    /**
+     * Default temporary file suffix to use.
+     */
+    public final static String DEFAULT_SUFFIX = ".tmp";
+    
+    protected final String _prefix;
+    protected final String _suffix;
+    
+    public StdTempFileProvider() { this(DEFAULT_PREFIX, DEFAULT_SUFFIX); }
+    public StdTempFileProvider(String prefix, String suffix) {
+        _prefix = prefix;
+        _suffix = suffix;
+    }
     
     @Override
-    public File provide(String prefix, String suffix) throws IOException
+    public File provide() throws IOException
     {
-        File f = File.createTempFile(prefix, suffix);
+        File f = File.createTempFile(_prefix, _suffix);
         f.deleteOnExit();
         return f;
     }
