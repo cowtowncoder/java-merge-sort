@@ -7,7 +7,12 @@ import com.fasterxml.sort.DataReader;
 
 /**
  * Simple {@link DataReader} implementation that can be used to
- * serve items from a {@link Collection} (or {@link Iterator})
+ * serve items from a {@link Collection} (or {@link Iterator}).
+ * Note that implementation of {@link #estimateSizeInBytes} is
+ * naive and returns 1 for all items; it must be redefined if
+ * memory limits are to be enforced, or alternatively
+ * <code>Sorter</code> should be configured with maximum number of
+ * items to use as memory limit.
  */
 public class CollectionReader<T> extends DataReader<T>
 {
@@ -32,6 +37,11 @@ public class CollectionReader<T> extends DataReader<T>
             return null;
         }
         return _items.next();
+    }
+
+    @Override
+    public int estimateSizeInBytes(T item) {
+        return 1;
     }
     
     @Override

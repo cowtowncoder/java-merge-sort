@@ -139,4 +139,29 @@ public class Sorter<T>
     /* Internal methods
     /********************************************************************** 
      */
+
+    /*
+    /********************************************************************** 
+    /* Main method for simple command-line operation for line-based
+    /* sorting using default ISO-8859-1 collation (i.e. byte-by-byte sorting)
+    /********************************************************************** 
+     */
+
+    public void sort(String[] args) throws Exception
+    {
+        if (args.length > 1) {
+            System.err.println("Usage: java "+getClass().getName()+" [input-file]");
+            System.err.println("(where input-file is optional; if missing, read from STDIN)");
+            System.exit(1);
+        }
+        if (args.length == 0) {
+            
+        } else {
+            File input = new File(args[0]);
+            if (!input.exists() || input.isDirectory()) {
+                System.err.println("File '"+input.getAbsolutePath()+"' does not exist (or is not file)");
+                System.exit(2);
+            }
+        }
+    }
 }
