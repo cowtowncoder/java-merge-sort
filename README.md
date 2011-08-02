@@ -13,10 +13,10 @@ Checkout [project wiki](https://github.com/cowtowncoder/java-merge-sort/wiki) fo
 
 Main class to interact with is `com.fasterxml.sort.Sorter`, which needs to be constructed with four things:
 
-# Configuration settings (default `SortConfig` works fine)
-# `DataReaderFactory` which is used for creating readers for intermediate sort files (and input, if stream passed)
-# `DataWriterFactory` which is used for creating writers for intermediate sort files (and results, if stream passed)
-# `Comparator` for data items
+* Configuration settings (default `SortConfig` works fine)
+* `DataReaderFactory` which is used for creating readers for intermediate sort files (and input, if stream passed)
+* `DataWriterFactory` which is used for creating writers for intermediate sort files (and results, if stream passed)
+* `Comparator` for data items
 
 An example of how this can be done can be found from `com.fasterxml.sort.std.TextFileSorter`.
 Basic implementations exist for line-based text input (in package `com.fasterxml.sort.std`), and additional implementations may be added: for example, a JSON data sorter could be implement as an extension module of `Jackson`.
