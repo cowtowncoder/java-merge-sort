@@ -1,6 +1,7 @@
 package com.fasterxml.sort.impl;
 
 import com.fasterxml.sort.SortTestBase;
+import com.fasterxml.sort.std.ByteArrayComparator;
 
 public class TestByteArrayComparator
     extends SortTestBase

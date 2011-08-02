@@ -1,6 +1,6 @@
 package com.fasterxml.sort;
 
-import com.fasterxml.sort.impl.StdTempFileProvider;
+import com.fasterxml.sort.std.StdTempFileProvider;
 
 /**
  * Configuration object used for changing details of sorting

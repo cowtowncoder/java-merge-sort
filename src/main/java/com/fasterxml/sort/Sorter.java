@@ -1,7 +1,8 @@
 package com.fasterxml.sort;
 
 import java.io.*;
-import java.util.Comparator;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main entry point for sorting functionality; object that drives
@@ -35,7 +36,7 @@ public class Sorter<T>
     
     protected SortingState.Phase _phase;
 
-    protected volatile boolean _cancelRequest;
+    protected final AtomicBoolean _cancelRequest = new AtomicBoolean(false);
     
     protected Exception _cancelForException;
     
@@ -72,11 +73,23 @@ public class Sorter<T>
      */
     
     @Override
-    public void cancel(RuntimeException e) {
-        // TODO Auto-generated method stub
-        
+    public void cancel() {
+        _cancelForException = null;
+        _cancelRequest.set(true);
     }
 
+    @Override
+    public void cancel(RuntimeException e) {
+        _cancelForException = e;
+        _cancelRequest.set(true);
+    }
+    
+    @Override
+    public void cancel(IOException e) {
+        _cancelForException = e;
+        _cancelRequest.set(true);
+    }
+    
     @Override
     public int getNumberOfSortRounds() {
         return -1;
@@ -131,37 +144,63 @@ public class Sorter<T>
     public void sort(DataReader<T>  inputReader, DataWriter<T> resultWriter)
         throws IOException
     {
+        // First, pre-sort:
+        _phase = SortingState.Phase.PRE_SORTING;
+        Collection<File> presorted = presort(inputReader);
+        if (_checkForCancel()) {
+            return;
+        }
+        _phase = SortingState.Phase.SORTING;
+        merge(presorted, resultWriter);
+        if (_checkForCancel()) {
+            return;
+        }
+        _phase = SortingState.Phase.COMPLETE;
+    }
+    
+    /*
+    /********************************************************************** 
+    /* Internal methods, pre-sorting
+    /********************************************************************** 
+     */
+
+    protected Collection<File> presort(DataReader<T> inputReader) throws IOException
+    {
+        ArrayList<File> result = new ArrayList<File>();
+        // !!! TBI
+        return result;
+    }
+
+    /*
+    /********************************************************************** 
+    /* Internal methods, sorting
+    /********************************************************************** 
+     */
+
+    protected void merge(Collection<File> presorted, DataWriter<T> resultWriter)
+        throws IOException
+    {
         // !!! TBI
     }
     
     /*
     /********************************************************************** 
-    /* Internal methods
+    /* Internal methods, other
     /********************************************************************** 
      */
-
-    /*
-    /********************************************************************** 
-    /* Main method for simple command-line operation for line-based
-    /* sorting using default ISO-8859-1 collation (i.e. byte-by-byte sorting)
-    /********************************************************************** 
-     */
-
-    public void sort(String[] args) throws Exception
+    
+    protected boolean _checkForCancel() throws IOException
     {
-        if (args.length > 1) {
-            System.err.println("Usage: java "+getClass().getName()+" [input-file]");
-            System.err.println("(where input-file is optional; if missing, read from STDIN)");
-            System.exit(1);
+        if (!_cancelRequest.get()) {
+            return false;
         }
-        if (args.length == 0) {
-            
-        } else {
-            File input = new File(args[0]);
-            if (!input.exists() || input.isDirectory()) {
-                System.err.println("File '"+input.getAbsolutePath()+"' does not exist (or is not file)");
-                System.exit(2);
+        if (_cancelForException != null) {
+            // can only be an IOException or RuntimeException, so
+            if (_cancelForException instanceof RuntimeException) {
+                throw (RuntimeException) _cancelForException;
             }
+            throw (IOException) _cancelForException;
         }
+        return true;
     }
 }

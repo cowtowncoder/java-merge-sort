@@ -1,4 +1,4 @@
-package com.fasterxml.sort.impl;
+package com.fasterxml.sort.std;
 
 import java.io.*;
 

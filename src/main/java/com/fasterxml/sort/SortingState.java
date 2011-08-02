@@ -1,5 +1,7 @@
 package com.fasterxml.sort;
 
+import java.io.IOException;
+
 /**
  * Interface that defines how calling application can interact with a {@link Sorter}; both
  * by accessing progress information and by requesting cancellation if necessary.
@@ -59,10 +61,24 @@ public interface SortingState
 
     /**
      * Method that can be used to try to cancel executing sort operation.
-     * Optional exception object can be specified; if non-null instance is given,
+     * No exception will be thrown; sorting will just be stopped as soon as
+     * sorting thread notices request.
+     */
+    public void cancel();
+    
+    /**
+     * Method that can be used to try to cancel executing sort operation.
+     * Exception object can be specified; if non-null instance is given,
      * it will be thrown to indicate erroneous result, otherwise sorting is
      * just interrupted but execution returns normally.
      */
     public void cancel(RuntimeException e);
 
+    /**
+     * Method that can be used to try to cancel executing sort operation.
+     * Exception object can be specified; if non-null instance is given,
+     * it will be thrown to indicate erroneous result, otherwise sorting is
+     * just interrupted but execution returns normally.
+     */
+    public void cancel(IOException e);
 }
