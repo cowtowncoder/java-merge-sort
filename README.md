@@ -3,6 +3,10 @@
 This project implements basic disk-backed multi-way merge sort, with configurable input and output formats (i.e. not just textual sort).
 It should be useful for systems that process large amounts of data, as a simple building block for sort phases.
 
+# Documentation 
+
+Checkout [https://github.com/cowtowncoder/java-merge-sort/wiki](project wiki) for more documentation, including javadocs.
+
 # Usage
 
 ## Programmatic access
