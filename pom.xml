@@ -12,11 +12,11 @@
   <packaging>bundle</packaging>
   <description>Basic disk-backed N-way merge sort
   </description>
-  <url>https://github.com/ning/java-merge-sort</url>
+  <url>https://github.com/cowtowncoder/java-merge-sort</url>
   <scm>
-    <connection>scm:git:git@github.com:ning/java-merge-sort.git</connection>
-    <developerConnection>scm:git:git@github.com:ning/java-merge-sort.git</developerConnection>
-    <url>http://github.com/ning/java-merge-sort</url>    
+    <connection>scm:git:git@github.com:cowtowncoder/java-merge-sort.git</connection>
+    <developerConnection>scm:git:git@github.com:cowtowncoder/java-merge-sort.git</developerConnection>
+    <url>http://github.com/cowtowncoder/java-merge-sort</url>    
   </scm>
   <developers>
         <developer>
@@ -112,19 +112,22 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.3.5</version>
+          <version>2.3.4</version>
           <extensions>true</extensions>
           <configuration>
             <instructions>
-              <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-              <Bundle-Vendor>com.ning</Bundle-Vendor>
+              <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+              <Bundle-Vendor>com.fasterxml</Bundle-Vendor>
               <Import-Package>
 </Import-Package>
               <Private-Package>
 </Private-Package>
               <Export-Package>
 com.fasterxml.sort
+,com.fasterxml.sort.std
+,com.fasterxml.sort.util
 </Export-Package>
+             <Main-Class>com.fasterxml.sort.std.TextFileSorter</Main-Class>
             </instructions>
           </configuration>
         </plugin>

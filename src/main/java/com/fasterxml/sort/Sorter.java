@@ -108,6 +108,11 @@ public class Sorter<T>
         _cancelForException = e;
         _cancelRequest.set(true);
     }
+
+    @Override
+    public Phase getPhase() {
+        return _phase;
+    }
     
     @Override
     public int getNumberOfSortRounds() {
@@ -207,7 +212,6 @@ public class Sorter<T>
                     return false;
                 }
                 merge(presorted, resultWriter);
-                // !!! TODO
             }
             resultClosed = true;
             resultWriter.close();
@@ -257,22 +261,28 @@ public class Sorter<T>
         } else  {
             minMemoryNeeded = 256L;
         }
+
+        // reduce mem amount by buffer cost too:
+        memoryToUse -= (ENTRY_SLOT_SIZE * segmentLength);
         
         while (true) {
             T value = inputReader.readNext();
             if (value == null) {
                 break;
             }
-            long size = ENTRY_SLOT_SIZE + inputReader.estimateSizeInBytes(value);
+            long size = inputReader.estimateSizeInBytes(value);
             if (size > minMemoryNeeded) {
                 minMemoryNeeded = size;
             }
             if (ptr >= segmentLength) {
                 segment = buffer.appendCompletedChunk(segment);
+                segmentLength = segment.length;
+                memoryToUse -= (ENTRY_SLOT_SIZE * segmentLength);
                 ptr = 0;
             }
             segment[ptr++] = value;
-            if ((memoryToUse -= size) < minMemoryNeeded) {
+            memoryToUse -= size;
+            if (memoryToUse < minMemoryNeeded) {
                 break;
             }
         }
@@ -289,6 +299,7 @@ public class Sorter<T>
             Object[] items = _readMax(inputReader, buffer, _config.getMaxMemoryUsage(), nextValue);
             Arrays.sort(items, _rawComparator());
             presorted.add(_writePresorted(items));
+            nextValue = inputReader.readNext();
         } while (nextValue != null);
         return presorted;
     }

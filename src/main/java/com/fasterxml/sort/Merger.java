@@ -36,7 +36,7 @@ public abstract class Merger<T>
         // otherwise, divide and conquer
         ArrayList<DataReader<T>> readers = new ArrayList<DataReader<T>>(1 + (inputs.size() >> 1));
         int i = 0;
-        final int end = inputs.size();
+        final int end = inputs.size()-1;
         for (; i < end; i += 2) {
             readers.add(new PairwiseMerger<T>(cmp, inputs.get(i), inputs.get(i+1)));
         }

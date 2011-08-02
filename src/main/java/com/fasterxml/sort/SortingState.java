@@ -23,6 +23,8 @@ public interface SortingState
     /* Accessors
     /************************************************************************
      */
+
+    public Phase getPhase();
     
     /**
      * Accessor for determining whether sorter is in its in-memory pre-sorting phase.
