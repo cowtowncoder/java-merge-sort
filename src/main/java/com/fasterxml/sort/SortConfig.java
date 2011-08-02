@@ -62,7 +62,7 @@ public class SortConfig
     /************************************************************************
      */
 
-    public int getMergeFactory() { return _mergeFactor; }
+    public int getMergeFactor() { return _mergeFactor; }
     
     public long getMaxMemoryUsage() { return _maxMemoryUsage; }
 

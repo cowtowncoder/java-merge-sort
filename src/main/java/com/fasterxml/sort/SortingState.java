@@ -40,6 +40,13 @@ public interface SortingState
     public boolean isCompleted();
 
     /**
+     * Accessor for checking how many pre-sort files were created during
+     * pre-sort phase. Can be zero if the whole data fit in memory during
+     * pre-sorting.
+     */
+    public int getNumberOfPreSortFiles();
+    
+    /**
      * Accessor for checking which sorting round sorter is doing: for pre-sort
      * it basically means number of segment (0-based) that is being processed
      * in-memory, for regular sort it is number of (0-based) sorting round.

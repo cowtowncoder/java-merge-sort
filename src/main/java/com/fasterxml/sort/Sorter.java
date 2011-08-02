@@ -49,6 +49,12 @@ public class Sorter<T>
     
     protected SortingState.Phase _phase;
 
+    protected int _presortFileCount;
+    
+    protected int _sortRoundCount;
+
+    protected int _currentSortRound;
+    
     protected final AtomicBoolean _cancelRequest = new AtomicBoolean(false);
     
     protected Exception _cancelForException;
@@ -105,14 +111,19 @@ public class Sorter<T>
     
     @Override
     public int getNumberOfSortRounds() {
-        return -1;
+        return _sortRoundCount;
     }
 
     @Override
-    public int getSortRound() {
-        return -1;
+    public int getNumberOfPreSortFiles() {
+        return _presortFileCount;
     }
-
+    
+    @Override
+    public int getSortRound() {
+        return _currentSortRound;
+    }
+    
     @Override
     public boolean isCompleted() {
         return (_phase == SortingState.Phase.COMPLETE);
@@ -169,6 +180,11 @@ public class Sorter<T>
         SegmentedBuffer buffer = new SegmentedBuffer();
         boolean inputClosed = false;
         boolean resultClosed = false;
+
+        _presortFileCount = 0;
+        _sortRoundCount = -1;
+        _currentSortRound = -1;
+        
         try {
             Object[] items = _readMax(inputReader, buffer, _config.getMaxMemoryUsage(), null);
             if (_checkForCancel()) {
@@ -183,7 +199,7 @@ public class Sorter<T>
                 _writeAll(resultWriter, items);
             } else {
                 // but if more data than memory-buffer-full, do it right:
-                Collection<File> presorted = presort(inputReader, buffer, items, next);
+                List<File> presorted = presort(inputReader, buffer, items, next);
                 inputClosed = true;
                 inputReader.close();
                 _phase = SortingState.Phase.SORTING;
@@ -263,7 +279,7 @@ public class Sorter<T>
         return buffer.completeAndClearBuffer(segment, ptr);
     }
     
-    protected Collection<File> presort(DataReader<T> inputReader,
+    protected List<File> presort(DataReader<T> inputReader,
             SegmentedBuffer buffer,
             Object[] firstSortedBatch, T nextValue) throws IOException
     {
@@ -282,6 +298,7 @@ public class Sorter<T>
         File tmp = _config.getTempFileProvider().provide();
         @SuppressWarnings("unchecked")
         DataWriter<Object> writer = (DataWriter<Object>) _writerFactory.constructWriter(new FileOutputStream(tmp));
+        ++_presortFileCount;
         for (Object item : items) {
             writer.writeEntry(item);
         }
@@ -295,10 +312,31 @@ public class Sorter<T>
     /********************************************************************** 
      */
 
-    protected void merge(Collection<File> presorted, DataWriter<T> resultWriter)
+    /**
+     * Main-level merge method called during once during sorting.
+     */
+    protected void merge(List<File> presorted, DataWriter<T> resultWriter)
         throws IOException
     {
-        // !!! TBI
+        // Ok, let's see how many rounds we should have...
+        final int mergeFactor = _config.getMergeFactor();
+        _sortRoundCount = _calculateRoundCount(presorted.size(), mergeFactor);
+        _currentSortRound = 0;
+
+        // first intermediate rounds
+        List<File> inputs = presorted;
+        while (inputs.size() > mergeFactor) {
+            ArrayList<File> outputs = new ArrayList<File>(1 + ((inputs.size() + mergeFactor - 1) / mergeFactor));
+            for (int offset = 0, end = inputs.size(); offset < end; offset += mergeFactor) {
+                int localEnd = Math.min(offset + mergeFactor, end);
+                outputs.add(_merge(inputs.subList(offset, localEnd)));
+            }
+            ++_currentSortRound;
+            // and then switch result files to be input files
+            inputs = outputs;
+        }
+        // and then last around to produce the result file
+        _merge(inputs, resultWriter);
     }
 
     protected void _writeAll(DataWriter<T> resultWriter, Object[] items)
@@ -311,12 +349,52 @@ public class Sorter<T>
             writer.writeEntry(item);
         }
     }
+
+    protected File _merge(List<File> inputs)
+        throws IOException
+    {
+        File resultFile = _config.getTempFileProvider().provide();
+        _merge(inputs, _writerFactory.constructWriter(new FileOutputStream(resultFile)));
+        return resultFile;
+    }
+
+    protected void _merge(List<File> inputs, DataWriter<T> writer)
+        throws IOException
+    {
+        ArrayList<DataReader<T>> readers = new ArrayList<DataReader<T>>(inputs.size());
+        try {
+            for (File mergedInput : inputs) {
+                readers.add(_readerFactory.constructReader(new FileInputStream(mergedInput)));
+            }
+            DataReader<T> merger = Merger.mergedReader(_comparator, readers);
+            T value;
+            
+            while ((value = merger.readNext()) != null) {
+                writer.writeEntry(value);
+            }
+            writer.close();
+        } finally {
+            for (File input : inputs) {
+                input.delete();
+            }
+        }
+    }
     
     /*
     /********************************************************************** 
     /* Internal methods, other
     /********************************************************************** 
      */
+
+    protected static int _calculateRoundCount(int files, int mergeFactor)
+    {
+        int count = 1;
+        while (files > mergeFactor) {
+            ++count;
+            files = (files + mergeFactor - 1) / mergeFactor;
+        }
+        return count;
+    }
     
     protected boolean _checkForCancel() throws IOException
     {

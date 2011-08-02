@@ -1,7 +1,7 @@
 package com.fasterxml.sort;
 
 import java.io.IOException;
-import java.util.Comparator;
+import java.util.*;
 
 /**
  * Object used to merge items from multiple input sources into one.
@@ -21,21 +21,30 @@ public abstract class Merger<T>
         _comparator = cmp;
     }
     
-    public static <T> DataReader<T> mergedReader(Comparator<T> cmp, DataReader<T>[] inputs)
+    public static <T> DataReader<T> mergedReader(Comparator<T> cmp, List<DataReader<T>> inputs)
         throws IOException
     {
-        switch (inputs.length) {
+        switch (inputs.size()) {
         case 0:
             throw new IllegalArgumentException("Can not pass empty DataReader array");
         case 1:
-            return inputs[0];
+            return inputs.get(0);
         case 2:
-            return new PairwiseMerger<T>(cmp, inputs[0], inputs[1]);
-        default:
-            // !! TBI
-            throw new IllegalArgumentException("Multi-way merges not yet supported");
+            return new PairwiseMerger<T>(cmp, inputs.get(0), inputs.get(1));
         }
         
+        // otherwise, divide and conquer
+        ArrayList<DataReader<T>> readers = new ArrayList<DataReader<T>>(1 + (inputs.size() >> 1));
+        int i = 0;
+        final int end = inputs.size();
+        for (; i < end; i += 2) {
+            readers.add(new PairwiseMerger<T>(cmp, inputs.get(i), inputs.get(i+1)));
+        }
+        // and for odd number of readers, add last one as is without merging
+        if (i < inputs.size()) {
+            readers.add(inputs.get(i));
+        }
+        return mergedReader(cmp, readers);
     }
 
     /*
