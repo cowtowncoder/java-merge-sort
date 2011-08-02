@@ -14,6 +14,13 @@ public class SortConfig
      */
     public final static long DEFAULT_MEMORY_USAGE = 40 * 1024 * 1024;
 
+    /**
+     * Default merge sort is 4-way sort (using 4 input files concurrently)
+     */
+    public final static int DEFAULT_MERGE_FACTOR = 4;
+
+    protected int _mergeFactor;
+
     protected long _maxMemoryUsage;
     
     protected TempFileProvider _tempFileProvider;
@@ -24,17 +31,27 @@ public class SortConfig
     /************************************************************************
      */
 
-    public SortConfig() {
+    public SortConfig()
+    {
+        _mergeFactor = DEFAULT_MERGE_FACTOR;
         _maxMemoryUsage = DEFAULT_MEMORY_USAGE;
         _tempFileProvider = new StdTempFileProvider();
     }
 
+    protected SortConfig(SortConfig base, int mergeFactor) {
+        _maxMemoryUsage = base._maxMemoryUsage;
+        _mergeFactor = mergeFactor;
+        _tempFileProvider = base._tempFileProvider;
+    }
+    
     protected SortConfig(SortConfig base, long maxMem) {
         _maxMemoryUsage = maxMem;
+        _mergeFactor = base._mergeFactor;
         _tempFileProvider = base._tempFileProvider;
     }
 
     protected SortConfig(SortConfig base, TempFileProvider prov) {
+        _mergeFactor = base._mergeFactor;
         _maxMemoryUsage = base._maxMemoryUsage;
         _tempFileProvider = prov;
     }
@@ -45,6 +62,8 @@ public class SortConfig
     /************************************************************************
      */
 
+    public int getMergeFactory() { return _mergeFactor; }
+    
     public long getMaxMemoryUsage() { return _maxMemoryUsage; }
 
     public TempFileProvider getTempFileProvider() { return _tempFileProvider; }

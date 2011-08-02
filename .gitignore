@@ -1,0 +1,12 @@
+*.iml
+*.ipr
+*.iws
+*.log
+.classpath
+.settings
+.project
+target
+pom.xml.releaseBackup
+release.properties
+*~
+test-output
