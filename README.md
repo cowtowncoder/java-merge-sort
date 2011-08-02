@@ -5,7 +5,7 @@ It should be useful for systems that process large amounts of data, as a simple 
 
 # Documentation 
 
-Checkout [https://github.com/cowtowncoder/java-merge-sort/wiki](project wiki) for more documentation, including javadocs.
+Checkout [project wiki](https://github.com/cowtowncoder/java-merge-sort/wiki) for more documentation, including javadocs.
 
 # Usage
 
