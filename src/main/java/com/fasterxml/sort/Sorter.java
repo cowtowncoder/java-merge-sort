@@ -379,7 +379,6 @@ public class Sorter<T>
             }
             DataReader<T> merger = Merger.mergedReader(_comparator, readers);
             T value;
-            
             while ((value = merger.readNext()) != null) {
                 writer.writeEntry(value);
             }

@@ -15,9 +15,9 @@ public class SortConfig
     public final static long DEFAULT_MEMORY_USAGE = 40 * 1024 * 1024;
 
     /**
-     * Default merge sort is 4-way sort (using 4 input files concurrently)
+     * Default merge sort is 16-way sort (using 16 input files concurrently)
      */
-    public final static int DEFAULT_MERGE_FACTOR = 4;
+    public final static int DEFAULT_MERGE_FACTOR = 16;
 
     protected int _mergeFactor;
 

@@ -68,7 +68,9 @@ public abstract class Merger<T>
         {
             super(comparator);
             _reader1 = reader1;
+            _data1 = reader1.readNext();
             _reader2 = reader2;
+            _data2 = reader2.readNext();
         }
 
         @Override

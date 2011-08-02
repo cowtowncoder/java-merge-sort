@@ -9,8 +9,17 @@ import com.fasterxml.sort.*;
  */
 public class TextFileSorter extends Sorter<byte[]>
 {
-    protected final static DataReaderFactory<byte[]> TEXT_INPUT_READER_FACTORY = null;
-    protected final static DataWriterFactory<byte[]> TEXT_INPUT_WRITER_FACTORY = null;
+    /**
+     * Let's limit maximum memory used for pre-sorting when invoked from command-line to be
+     * 256 megs
+     */
+    public final static long MAX_HEAP_FOR_PRESORT = 256L * 1024 * 1024;
+
+    /**
+     * Also just in case our calculations are wrong, require 10 megs for pre-sort anyway
+     * (if invoked from CLI)
+     */
+    public final static long MIN_HEAP_FOR_PRESORT = 10L * 1024 * 1024;
     
     public TextFileSorter() {
         this(new SortConfig());
@@ -29,7 +38,7 @@ public class TextFileSorter extends Sorter<byte[]>
     /* sorting using default ISO-8859-1 collation (i.e. byte-by-byte sorting)
     /********************************************************************** 
      */
-
+    
     public static void main(String[] args) throws Exception
     {
         if (args.length > 1) {
@@ -37,7 +46,17 @@ public class TextFileSorter extends Sorter<byte[]>
             System.err.println("(where input-file is optional; if missing, read from STDIN)");
             System.exit(1);
         }
-        final TextFileSorter sorter = new TextFileSorter();
+        
+        // One more thing: use 50% of memory (but no more than 200 megs) for pre-sort
+        // minor tweak: consider first 40 megs to go for other overhead...
+        long availMem = Runtime.getRuntime().maxMemory() - (40 * 1024 * 1024);
+        long maxMem = (availMem >> 1);
+        if (maxMem > MAX_HEAP_FOR_PRESORT) {
+            maxMem = MAX_HEAP_FOR_PRESORT;
+        } else if (maxMem < MIN_HEAP_FOR_PRESORT) {
+            maxMem = MIN_HEAP_FOR_PRESORT;
+        }
+        final TextFileSorter sorter = new TextFileSorter(new SortConfig().withMaxMemoryUsage(maxMem));
         final InputStream in;
         
         if (args.length == 0) {
