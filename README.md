@@ -31,6 +31,14 @@ where former takes input as streams and uses configured reader/writer factories 
 
 In addition to core sorting functionality, `Sorter` instance also gives access to progress information (it implements `SortingState` interface with accessor methods).
 
+A very simple example of sorting a text file using line-by-line comparison is:
+
+    TextSorter sorter = new TextFileSorter(new SortConfig().withMaxMemoryUsage(20 * 1000 * 1000));
+    sorter.sort(new FileInputStream("input.txt"),
+        new FileOutputStream("output.txt"));
+
+which would read text from file "input.txt", sort using about 20 megs of heap (note: estimates for memory usage are rough), use temporary files if necessary (i.e. for small files it's just in-memoryu sort, for bigger real merge sort), and write output as file "output.txt".
+
 ## Command-line utility
 
 Project jar is packaged such that it can be used as a primitive 'sort' tool like so:
@@ -38,6 +46,7 @@ Project jar is packaged such that it can be used as a primitive 'sort' tool like
     java -jar java-merge-sort-0.5.0.jar [input-file]
 
 where sorted output gets printed to `stdout`; and argument is optional (if missing, reads input from stdout).
+(implementation note: this uses standard `TextFileSorter` mentioned above)
 
 Format is assumed to be basic text lines, similar to unix `sort`, and sorting order basic byte sorting (which works for most common encodings).
 
