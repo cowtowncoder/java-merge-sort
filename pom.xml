@@ -8,7 +8,7 @@
   <groupId>com.fasterxml.util</groupId>
   <artifactId>java-merge-sort</artifactId>
   <name>java-merge-sort</name>
-  <version>0.6.0</version>
+  <version>0.6.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <description>Basic disk-backed N-way merge sort
   </description>
