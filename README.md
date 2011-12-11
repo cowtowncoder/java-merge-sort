@@ -50,6 +50,12 @@ where sorted output gets printed to `stdout`; and argument is optional (if missi
 
 Format is assumed to be basic text lines, similar to unix `sort`, and sorting order basic byte sorting (which works for most common encodings).
 
+## More documentation
+
+Here are some external links:
+
+* [Sorting large data sets](http://www.cowtowncoder.com/blog/archives/2011/12/entry_465.html) (includes example for sorting JSON files)
+
 # Getting involved
 
 To access source, just clone [project](https://github.com/cowtowncoder/java-merge-sort)

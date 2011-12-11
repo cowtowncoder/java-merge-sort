@@ -32,14 +32,17 @@ public class Sorter<T>
     /**
      * Factory used for reading intermediate sorted files.
      */
-    protected final DataReaderFactory<T> _readerFactory;
+    protected DataReaderFactory<T> _readerFactory;
     
     /**
      * Factory used for writing intermediate sorted files.
      */
-    protected final DataWriterFactory<T> _writerFactory;
+    protected DataWriterFactory<T> _writerFactory;
 
-    protected final Comparator<T> _comparator;
+    /**
+     * Comparator to use for sorting entries; defaults to 'C
+     */
+    protected Comparator<T> _comparator;
     
     /*
     /********************************************************************** 
@@ -85,6 +88,26 @@ public class Sorter<T>
         _phase = null;
     }
 
+    protected Sorter() {
+        this(new SortConfig());
+    }
+    
+    protected Sorter(SortConfig config) {
+        this(config, null, null, null);
+    }
+    
+    protected Sorter<T> withReaderFactory(DataReaderFactory<T> f) {
+        return new Sorter<T>(_config, f, _writerFactory, _comparator);
+    }
+
+    protected Sorter<T> withWriterFactory(DataWriterFactory<T> f) {
+        return new Sorter<T>(_config, _readerFactory, f, _comparator);
+    }
+
+    protected Sorter<T> withComparator(Comparator<T> cmp) {
+        return new Sorter<T>(_config, _readerFactory, _writerFactory, cmp);
+    }
+    
     /*
     /********************************************************************** 
     /* SortingState implementation
