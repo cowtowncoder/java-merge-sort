@@ -254,7 +254,7 @@ public class Sorter<T>
                 } catch (IOException e) { }
             }
         }
-        return false;
+        return true;
     }
     
     /*
