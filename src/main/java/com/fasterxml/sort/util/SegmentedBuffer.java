@@ -1,5 +1,7 @@
 package com.fasterxml.sort.util;
 
+import java.util.Arrays;
+
 /**
  * Helper class used instead of a standard JDK list or buffer,
  * to avoid constant re-allocations.
@@ -59,7 +61,9 @@ public class SegmentedBuffer
      */
     public Object[] resetAndStart()
     {
-        _reset();
+        if (_bufferedEntryCount > 0) {
+            _reset();
+        }
         if (_freeBuffer == null) {
             return new Object[INITIAL_CHUNK_SIZE];
         }
@@ -115,6 +119,8 @@ public class SegmentedBuffer
         int totalSize = lastChunkEntries + _bufferedEntryCount;
         Object[] result = new Object[totalSize];
         _copyTo(result, totalSize, lastChunk, lastChunkEntries);
+        // [Issue-5]: should reduce mem usage here
+        _reset();
         return result;
     }
         
@@ -144,12 +150,17 @@ public class SegmentedBuffer
     private void _reset()
     {
         // can we reuse the last (and thereby biggest) array for next time?
-        if (_bufferTail != null) {
-            _freeBuffer = _bufferTail.getData();
+        if (_bufferedEntryCount > 0) {
+            if (_bufferTail != null) {
+                Object[] obs = _bufferTail.getData();
+                // also, let's clear it of contents as well, just in case
+                Arrays.fill(obs, null);
+                _freeBuffer = obs;
+            }
+            // either way, must discard current contents
+            _bufferHead = _bufferTail = null;
+            _bufferedEntryCount = 0;
         }
-        // either way, must discard current contents
-        _bufferHead = _bufferTail = null;
-        _bufferedEntryCount = 0;
     }
 
     private final void _copyTo(Object resultArray, int totalSize,
@@ -186,9 +197,9 @@ public class SegmentedBuffer
         /**
          * Data stored in this node. Array is considered to be full.
          */
-        final Object[] _data;
+        private final Object[] _data;
 
-        Node _next;
+        private Node _next;
 
         public Node(Object[] data) {
             _data = data;

@@ -195,16 +195,12 @@ public class Sorter<T>
      * 
      * @return true if sorting completed succesfully; false if it was cancelled
      */
-    public boolean sort(DataReader<T>  inputReader, DataWriter<T> resultWriter)
+    public boolean sort(DataReader<T> inputReader, DataWriter<T> resultWriter)
         throws IOException
     {
         // First, pre-sort:
         _phase = SortingState.Phase.PRE_SORTING;
 
-        /* Minor optimization: in case all entries might fit in
-         * in-memory sort buffer, avoid writing intermediate file
-         * and just write results directly.
-         */
         SegmentedBuffer buffer = new SegmentedBuffer();
         boolean inputClosed = false;
         boolean resultClosed = false;
@@ -220,6 +216,10 @@ public class Sorter<T>
             }
             Arrays.sort(items, _rawComparator());
             T next = inputReader.readNext();
+            /* Minor optimization: in case all entries might fit in
+             * in-memory sort buffer, avoid writing intermediate file
+             * and just write results directly.
+             */
             if (next == null) {
                 inputClosed = true;
                 inputReader.close();
@@ -318,6 +318,8 @@ public class Sorter<T>
     {
         ArrayList<File> presorted = new ArrayList<File>();
         presorted.add(_writePresorted(firstSortedBatch));
+        // important: clear out the ref to let possibly sizable array to be GCed
+        firstSortedBatch = null;
         do {
             Object[] items = _readMax(inputReader, buffer, _config.getMaxMemoryUsage(), nextValue);
             Arrays.sort(items, _rawComparator());
@@ -333,8 +335,10 @@ public class Sorter<T>
         @SuppressWarnings("unchecked")
         DataWriter<Object> writer = (DataWriter<Object>) _writerFactory.constructWriter(new FileOutputStream(tmp));
         ++_presortFileCount;
-        for (Object item : items) {
-            writer.writeEntry(item);
+        for (int i = 0, end = items.length; i < end; ++i) {
+            writer.writeEntry(items[i]);
+            // to further reduce transient mem usage, clear out the ref
+            items[i] = null;
         }
         writer.close();
         return tmp;
