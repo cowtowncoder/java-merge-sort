@@ -225,9 +225,11 @@ public class Sorter<T>
                 inputReader.close();
                 _phase = SortingState.Phase.SORTING;
                 _writeAll(resultWriter, items);
-            } else {
-                // but if more data than memory-buffer-full, do it right:
-                List<File> presorted = presort(inputReader, buffer, items, next);
+            } else { // but if more data than memory-buffer-full, do it right:
+                List<File> presorted = new ArrayList<File>();
+                presorted.add(_writePresorted(items));
+                items = null; // it's a big array, clear refs as early as possible
+                _presort(inputReader, buffer, next, presorted);
                 inputClosed = true;
                 inputReader.close();
                 _phase = SortingState.Phase.SORTING;
@@ -312,21 +314,16 @@ public class Sorter<T>
         return buffer.completeAndClearBuffer(segment, ptr);
     }
     
-    protected List<File> presort(DataReader<T> inputReader,
-            SegmentedBuffer buffer,
-            Object[] firstSortedBatch, T nextValue) throws IOException
+    protected void _presort(DataReader<T> inputReader, SegmentedBuffer buffer, T nextValue,
+            List<File> presorted)
+        throws IOException
     {
-        ArrayList<File> presorted = new ArrayList<File>();
-        presorted.add(_writePresorted(firstSortedBatch));
-        // important: clear out the ref to let possibly sizable array to be GCed
-        firstSortedBatch = null;
         do {
             Object[] items = _readMax(inputReader, buffer, _config.getMaxMemoryUsage(), nextValue);
             Arrays.sort(items, _rawComparator());
             presorted.add(_writePresorted(items));
             nextValue = inputReader.readNext();
         } while (nextValue != null);
-        return presorted;
     }
 
     protected File _writePresorted(Object[] items) throws IOException
