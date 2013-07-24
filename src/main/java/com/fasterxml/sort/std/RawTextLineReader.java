@@ -77,14 +77,16 @@ public class RawTextLineReader
                 return null;
             }
         }
-        final int start = _inputPtr;
 
         // first thing(s) first: skip a linefeed we might have
         if (_hadCR) {
-            if (!_skipCR()) {
+            if (!_skipLF()) {
                 return null;
             }
         }
+
+        // set the start point after our call to _skipLF() so that if a linefeed is skipped, we also skip it in Arrays.copyOfRange below
+        final int start = _inputPtr;
 
         // then common case: we find full row:
         final int end = _inputEnd;
@@ -145,7 +147,7 @@ public class RawTextLineReader
         return true;
     }
 
-    protected boolean _skipCR() throws IOException
+    protected boolean _skipLF() throws IOException
     {
         _hadCR = false;
         if (_inputBuffer[_inputPtr] == BYTE_LF) {
