@@ -1,18 +1,19 @@
-Version: 0.7.1
+Project: java-merge-sort
+License: Apache License 2.0
+Version: 0.7.2
+Release date: not released yet
 
-Release date:
-  29-May-2012
-
-Description:
-  Another pre-1.0 release
-
-Fixes:
-
-* [Issue-5]: Unnecessary object retention, leading to too high memory usage
- (reported by Paul Smith)
+* [Issue#6]: Incorrect handling of '\r'
+ (reported, patch contributed by ndikan@github.bom)
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
+
+0.7.1 (29-May-2012)
+
+* [Issue#5]: Unnecessary object retention, leading to too high memory usage
+ (reported by Paul Smith)
+
 
 
