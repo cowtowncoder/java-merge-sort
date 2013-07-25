@@ -1,7 +1,7 @@
 Project: java-merge-sort
 License: Apache License 2.0
 Version: 0.7.2
-Release date: not released yet
+Release date: 24-Jul-2013
 
 * [Issue#6]: Incorrect handling of '\r'
  (reported, patch contributed by ndikan@github.bom)
