@@ -61,6 +61,8 @@ public abstract class Merger<T>
 
         protected T _data1;
         protected T _data2;
+
+        protected boolean _closed;
         
         public PairwiseMerger(Comparator<T> comparator,
                 DataReader<T> reader1, DataReader<T> reader2)
@@ -78,6 +80,8 @@ public abstract class Merger<T>
         {
             if (_data1 == null) {
                 if (_data2 == null) {
+                    // [Issue#8]: Should auto-close merged input when there is no more data
+                    close();
                     return null;
                 }
                 T result = _data2;
@@ -108,9 +112,13 @@ public abstract class Merger<T>
         }
 
         @Override
-        public void close() throws IOException {
-            _reader1.close();
-            _reader2.close();
+        public void close() throws IOException
+        {
+            if (!_closed) {
+                _reader1.close();
+                _reader2.close();
+                _closed = true;
+            }
         }
     }
 }

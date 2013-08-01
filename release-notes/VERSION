@@ -1,14 +1,19 @@
 Project: java-merge-sort
 License: Apache License 2.0
-Version: 0.8.0
-Release date: 24-Jul-2013
+Version: 0.8.1
+Release date: xx-Aug-2013
 
-* [Issue#6]: Incorrect handling of '\r'
- (reported, patch contributed by ndikan@github.bom)
+#8: Sorter._merge() not closing streams correctly
+ (reported by tjoneslo@github)
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
+
+0.8.0 (24-Jul-2013)
+
+* [Issue#6]: Incorrect handling of '\r'
+ (reported, patch contributed by ndikan@github.bom)
 
 0.7.1 (29-May-2012)
 

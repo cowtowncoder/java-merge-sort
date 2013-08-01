@@ -326,18 +326,28 @@ public class Sorter<T>
         } while (nextValue != null);
     }
 
+    @SuppressWarnings("resource")
     protected File _writePresorted(Object[] items) throws IOException
     {
         File tmp = _config.getTempFileProvider().provide();
         @SuppressWarnings("unchecked")
         DataWriter<Object> writer = (DataWriter<Object>) _writerFactory.constructWriter(new FileOutputStream(tmp));
-        ++_presortFileCount;
-        for (int i = 0, end = items.length; i < end; ++i) {
-            writer.writeEntry(items[i]);
-            // to further reduce transient mem usage, clear out the ref
-            items[i] = null;
+        boolean closed = false;
+        try {
+            ++_presortFileCount;
+            for (int i = 0, end = items.length; i < end; ++i) {
+                writer.writeEntry(items[i]);
+                // to further reduce transient mem usage, clear out the ref
+                items[i] = null;
+            }
+            closed = true;
+            writer.close();
+        } finally {
+            if (!closed) {
+                // better swallow since most likely we are getting an exception already...
+                try { writer.close(); } catch (IOException e) { }
+            }
         }
-        writer.close();
         return tmp;
     }
     
@@ -385,6 +395,7 @@ public class Sorter<T>
         }
     }
 
+    @SuppressWarnings("resource")
     protected File _merge(List<File> inputs)
         throws IOException
     {
@@ -397,17 +408,23 @@ public class Sorter<T>
         throws IOException
     {
         ArrayList<DataReader<T>> readers = new ArrayList<DataReader<T>>(inputs.size());
+        DataReader<T> merger = null;
         try {
             for (File mergedInput : inputs) {
                 readers.add(_readerFactory.constructReader(new FileInputStream(mergedInput)));
             }
-            DataReader<T> merger = Merger.mergedReader(_comparator, readers);
+            merger = Merger.mergedReader(_comparator, readers);
             T value;
             while ((value = merger.readNext()) != null) {
                 writer.writeEntry(value);
             }
+            merger.close(); // usually not necessary (reader should close on eof) but...
+            merger = null;
             writer.close();
         } finally {
+            if (merger != null) {
+                try { merger.close(); } catch (IOException e) { }
+            }
             for (File input : inputs) {
                 input.delete();
             }
