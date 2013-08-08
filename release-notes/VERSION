@@ -1,7 +1,7 @@
 Project: java-merge-sort
 License: Apache License 2.0
 Version: 0.8.1
-Release date: xx-Aug-2013
+Release date: 07-Aug-2013
 
 #8: Sorter._merge() not closing streams correctly
  (reported by tjoneslo@github)
