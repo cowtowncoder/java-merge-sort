@@ -11,28 +11,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class IterableSorter<T> extends SorterBase<T> implements Iterable<T>
+public class IteratingSorter<T> extends SorterBase<T>
 {
     // Set iff sort spilled to disk
     private List<File> _mergerInputs;
     private DataReader<T> _merger;
-    // Set iff sorting completed without cancelation
-    private Iterator<T> _iterator;
 
 
-    protected IterableSorter(SortConfig config,
-                             DataReaderFactory<T> readerFactory,
-                             DataWriterFactory<T> writerFactory,
-                             Comparator<T> comparator)
+    protected IteratingSorter(SortConfig config,
+                              DataReaderFactory<T> readerFactory,
+                              DataWriterFactory<T> writerFactory,
+                              Comparator<T> comparator)
     {
         super(config, readerFactory, writerFactory, comparator);
     }
 
-    protected IterableSorter() {
+    protected IteratingSorter() {
         super();
     }
 
-    protected IterableSorter(SortConfig config) {
+    protected IteratingSorter(SortConfig config) {
         super(config);
     }
 
@@ -44,9 +42,9 @@ public class IterableSorter<T> extends SorterBase<T> implements Iterable<T>
      * using {@link DataReaderFactory} and {@link DataWriterFactory} configured
      * for this sorter.
      *
-     * @return true if sorting complete and output is ready to be written; false if it was cancelled
+     * @return Iterator if sorting complete and output is ready to be written; null if it was cancelled
      */
-    public boolean sort(DataReader<T> inputReader)
+    public Iterator<T> sort(DataReader<T> inputReader)
         throws IOException
     {
         // Clean up any previous sort
@@ -61,10 +59,12 @@ public class IterableSorter<T> extends SorterBase<T> implements Iterable<T>
         _sortRoundCount = -1;
         _currentSortRound = -1;
 
+        Iterator<T> iterator = null;
         try {
             Object[] items = _readMax(inputReader, buffer, _config.getMaxMemoryUsage(), null);
             if (_checkForCancel()) {
-                return false;
+                close();
+                return null;
             }
             Arrays.sort(items, _rawComparator());
             T next = inputReader.readNext();
@@ -76,7 +76,7 @@ public class IterableSorter<T> extends SorterBase<T> implements Iterable<T>
                 inputClosed = true;
                 inputReader.close();
                 _phase = Phase.SORTING;
-                _iterator = new CastingIterator<T>(Arrays.asList(items).iterator());
+                iterator = new CastingIterator<T>(Arrays.asList(items).iterator());
             } else { // but if more data than memory-buffer-full, do it right:
                 List<File> presorted = new ArrayList<File>();
                 presorted.add(_writePresorted(items));
@@ -86,11 +86,12 @@ public class IterableSorter<T> extends SorterBase<T> implements Iterable<T>
                 inputReader.close();
                 _phase = Phase.SORTING;
                 if (_checkForCancel(presorted)) {
-                    return false;
+                    close();
+                    return null;
                 }
                 _mergerInputs = presorted;
                 _merger = merge(presorted);
-                _iterator = new MergerIterator<T>(_merger);
+                iterator = new MergerIterator<T>(_merger);
             }
         } finally {
             if (!inputClosed) {
@@ -102,24 +103,11 @@ public class IterableSorter<T> extends SorterBase<T> implements Iterable<T>
             }
         }
         if (_checkForCancel()) {
-            return false;
+            close();
+            return null;
         }
         _phase = Phase.COMPLETE;
-        return true;
-    }
-
-    /*
-    /**********************************************************************
-    /* Iterable API
-    /**********************************************************************
-    */
-
-    @Override
-    public Iterator<T> iterator() {
-        if (_iterator == null) {
-            throw new IllegalStateException("Not yet sorted");
-        }
-        return _iterator;
+        return iterator;
     }
 
     public void close() {
@@ -138,7 +126,6 @@ public class IterableSorter<T> extends SorterBase<T> implements Iterable<T>
         }
         _mergerInputs = null;
         _merger = null;
-        _iterator = null;
     }
 
 

@@ -13,7 +13,7 @@ import java.util.Iterator;
  * Since the cost of creating new instances is trivial, there is usually
  * no benefit from reusing instances, other than possible convenience.
  */
-public class Sorter<T> extends IterableSorter<T>
+public class Sorter<T> extends IteratingSorter<T>
 {
     /**
      * @param config Configuration for the sorter
@@ -70,10 +70,10 @@ public class Sorter<T> extends IterableSorter<T>
     public boolean sort(DataReader<T> inputReader, DataWriter<T> resultWriter)
         throws IOException
     {
-        if(!super.sort(inputReader)) {
+        Iterator<T> it = super.sort(inputReader);
+        if(it == null) {
             return false;
         }
-        Iterator<T> it = super.iterator();
         try {
             while(it.hasNext()) {
                 T value = it.next();
