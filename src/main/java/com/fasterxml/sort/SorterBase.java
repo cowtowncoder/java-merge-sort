@@ -242,8 +242,9 @@ public abstract class SorterBase<T>
 
     /**
      * Main-level merge method called during once during sorting.
+     * @return DataReader that will produced a fully sorted stream.
      */
-    protected void merge(List<File> presorted, DataWriter<T> resultWriter)
+    protected DataReader<T> merge(List<File> presorted)
         throws IOException
     {
         // Ok, let's see how many rounds we should have...
@@ -263,19 +264,7 @@ public abstract class SorterBase<T>
             // and then switch result files to be input files
             inputs = outputs;
         }
-        // and then last around to produce the result file
-        _merge(inputs, resultWriter);
-    }
-
-    protected void _writeAll(DataWriter<T> resultWriter, Object[] items)
-        throws IOException
-    {
-        // need to go through acrobatics, due to type erasure... works, if ugly:
-        @SuppressWarnings("unchecked")
-        DataWriter<Object> writer = (DataWriter<Object>) resultWriter;
-        for (Object item : items) {
-            writer.writeEntry(item);
-        }
+        return _createMergeReader(inputs);
     }
 
     @SuppressWarnings("resource")
@@ -290,13 +279,9 @@ public abstract class SorterBase<T>
     protected void _merge(List<File> inputs, DataWriter<T> writer)
         throws IOException
     {
-        ArrayList<DataReader<T>> readers = new ArrayList<DataReader<T>>(inputs.size());
         DataReader<T> merger = null;
         try {
-            for (File mergedInput : inputs) {
-                readers.add(_readerFactory.constructReader(new FileInputStream(mergedInput)));
-            }
-            merger = Merger.mergedReader(_comparator, readers);
+            merger = _createMergeReader(inputs);
             T value;
             while ((value = merger.readNext()) != null) {
                 writer.writeEntry(value);
@@ -312,6 +297,14 @@ public abstract class SorterBase<T>
                 input.delete();
             }
         }
+    }
+
+    protected DataReader<T> _createMergeReader(List<File> inputs) throws IOException {
+        ArrayList<DataReader<T>> readers = new ArrayList<DataReader<T>>(inputs.size());
+        for (File mergedInput : inputs) {
+            readers.add(_readerFactory.constructReader(new FileInputStream(mergedInput)));
+        }
+        return Merger.mergedReader(_comparator, readers);
     }
     
     /*
