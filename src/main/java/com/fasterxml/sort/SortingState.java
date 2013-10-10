@@ -37,7 +37,7 @@ public interface SortingState
     public boolean isSorting();
 
     /**
-     * Accessor for determining whether sorting has been succesfully completed or not.
+     * Accessor for determining whether sorting has been successfully completed or not.
      */
     public boolean isCompleted();
 
