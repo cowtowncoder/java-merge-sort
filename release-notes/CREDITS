@@ -3,7 +3,12 @@ Here are individuals who have contributed to development of this project.
 
 Tatu Saloranta, tatu.saloranta@iki.fi: author
 
-ndikan@github.com:
+ndikan@github.com
 
  * Reported [Issue#6]: broken handling of '\r' (on Windows)
   (0.7.2)
+
+Nathan Williams (nathanlws@github)
+
+ * Contributed #10: Add Iterator-based(pull-style) sorter as an alternative
+  (0.9.0)

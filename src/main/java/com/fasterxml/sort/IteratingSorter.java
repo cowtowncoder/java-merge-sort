@@ -1,5 +1,6 @@
 package com.fasterxml.sort;
 
+import com.fasterxml.sort.util.CastingIterator;
 import com.fasterxml.sort.util.SegmentedBuffer;
 
 import java.io.Closeable;
@@ -137,49 +138,11 @@ public class IteratingSorter<T> extends SorterBase<T> implements Closeable
         _merger = null;
     }
 
-
     /*
     /**********************************************************************
-    /* Exception API
+    /* Iterator implementations
     /**********************************************************************
     */
-
-    public static class IterableSorterException extends RuntimeException {
-        public IterableSorterException(IOException cause) {
-            super(cause);
-        }
-    }
-
-
-    /*
-    /**********************************************************************
-    /* Iterator API
-    /**********************************************************************
-    */
-
-    private static class CastingIterator<T> implements Iterator<T> {
-        private final Iterator<Object> _it;
-
-        public CastingIterator(Iterator<Object> it) {
-            _it = it;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return _it.hasNext();
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public T next() {
-            return (T)_it.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
 
     private static class MergerIterator<T> implements Iterator<T> {
         private final DataReader<T> _merger;
