@@ -241,10 +241,21 @@ public abstract class SorterBase<T>
      */
 
     /**
-     * Main-level merge method called during once during sorting.
-     * @return DataReader that will produced a fully sorted stream.
+     * Main-level merge method that sorts the given input and writes to final output.
      */
-    protected DataReader<T> merge(List<File> presorted)
+    protected void merge(List<File> presorted, DataWriter<T> resultWriter)
+        throws IOException
+    {
+        List<File> inputs = merge(presorted);
+        // and then last around to produce the result file
+        _merge(inputs, resultWriter);
+    }
+
+    /**
+     * Main-level merge method that sorts the given input.
+     * @return List of files that are individually sorted and ready for final merge.
+     */
+    protected List<File> merge(List<File> presorted)
         throws IOException
     {
         // Ok, let's see how many rounds we should have...
@@ -264,7 +275,18 @@ public abstract class SorterBase<T>
             // and then switch result files to be input files
             inputs = outputs;
         }
-        return _createMergeReader(inputs);
+        return inputs;
+    }
+
+    protected void _writeAll(DataWriter<T> resultWriter, Object[] items)
+        throws IOException
+    {
+        // need to go through acrobatics, due to type erasure... works, if ugly:
+        @SuppressWarnings("unchecked")
+        DataWriter<Object> writer = (DataWriter<Object>) resultWriter;
+        for (Object item : items) {
+            writer.writeEntry(item);
+        }
     }
 
     @SuppressWarnings("resource")

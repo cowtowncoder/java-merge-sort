@@ -38,6 +38,18 @@ public class Sorter<T> extends IteratingSorter<T>
         super(config);
     }
 
+    protected Sorter<T> withReaderFactory(DataReaderFactory<T> f) {
+        return new Sorter<T>(_config, f, _writerFactory, _comparator);
+    }
+
+    protected Sorter<T> withWriterFactory(DataWriterFactory<T> f) {
+        return new Sorter<T>(_config, _readerFactory, f, _comparator);
+    }
+
+    protected Sorter<T> withComparator(Comparator<T> cmp) {
+        return new Sorter<T>(_config, _readerFactory, _writerFactory, cmp);
+    }
+
 
     /*
     /********************************************************************** 
