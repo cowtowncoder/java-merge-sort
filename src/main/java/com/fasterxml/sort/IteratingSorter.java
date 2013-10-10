@@ -2,6 +2,7 @@ package com.fasterxml.sort;
 
 import com.fasterxml.sort.util.SegmentedBuffer;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class IteratingSorter<T> extends SorterBase<T>
+public class IteratingSorter<T> extends SorterBase<T> implements Closeable
 {
     // Set iff sort spilled to disk
     private List<File> _mergerInputs;
@@ -110,6 +111,14 @@ public class IteratingSorter<T> extends SorterBase<T>
         return iterator;
     }
 
+
+    /*
+    /**********************************************************************
+    /* Closeable API
+    /**********************************************************************
+    */
+
+    @Override
     public void close() {
         if (_merger != null) {
             try {
