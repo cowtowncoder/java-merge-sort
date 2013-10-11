@@ -44,6 +44,9 @@ public class IteratingSorter<T> extends SorterBase<T> implements Closeable
      * using {@link DataReaderFactory} and {@link DataWriterFactory} configured
      * for this sorter.
      *
+     * The returned Iterator will throw {@link IterableSorterException} if any
+     * IOException is encountered during calls of {@link Iterator#next()}.
+     *
      * @return Iterator if sorting complete and output is ready to be written; null if it was cancelled
      */
     public Iterator<T> sort(DataReader<T> inputReader)
