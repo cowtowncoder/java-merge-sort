@@ -22,19 +22,19 @@ public class Sorter<T> extends IteratingSorter<T>
      * @param writerFactory Factory used for creating writers for storing pre-sorted data;
      *   as well as for results if an {@link OutputStream} is passed as destination.
      */
-    protected Sorter(SortConfig config,
-                     DataReaderFactory<T> readerFactory,
-                     DataWriterFactory<T> writerFactory,
-                     Comparator<T> comparator)
+    public Sorter(SortConfig config,
+                  DataReaderFactory<T> readerFactory,
+                  DataWriterFactory<T> writerFactory,
+                  Comparator<T> comparator)
     {
         super(config, readerFactory, writerFactory, comparator);
     }
 
-    protected Sorter() {
+    public Sorter() {
         super();
     }
 
-    protected Sorter(SortConfig config) {
+    public Sorter(SortConfig config) {
         super(config);
     }
 
