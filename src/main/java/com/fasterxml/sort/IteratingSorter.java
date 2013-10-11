@@ -20,19 +20,19 @@ public class IteratingSorter<T> extends SorterBase<T> implements Closeable
     private DataReader<T> _merger;
 
 
-    protected IteratingSorter(SortConfig config,
-                              DataReaderFactory<T> readerFactory,
-                              DataWriterFactory<T> writerFactory,
-                              Comparator<T> comparator)
+    public IteratingSorter(SortConfig config,
+                           DataReaderFactory<T> readerFactory,
+                           DataWriterFactory<T> writerFactory,
+                           Comparator<T> comparator)
     {
         super(config, readerFactory, writerFactory, comparator);
     }
 
-    protected IteratingSorter() {
+    public IteratingSorter() {
         super();
     }
 
-    protected IteratingSorter(SortConfig config) {
+    public IteratingSorter(SortConfig config) {
         super(config);
     }
 
