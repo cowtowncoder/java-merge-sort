@@ -1,14 +1,23 @@
 Project: java-merge-sort
 License: Apache License 2.0
-Version: 0.9.0
-Release date: 10-Oct-2013
+Version: 0.9.1
+Release date: 11-Oct-2013
 
-#10: Add Iterator-based (pull-style) sorter as an alternative
+0.9.1
+
+#11: Change more constructors to be public
+ (contributed by Nathan W)
+#12: Fix an issue with implementation of #11
  (contributed by Nathan W)
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
+
+0.9.0 (10-Oct-2013)
+
+#10: Add Iterator-based (pull-style) sorter as an alternative
+ (contributed by Nathan W)
 
 0.8.1 (07-Aug-2013)
 

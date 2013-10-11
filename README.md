@@ -47,7 +47,7 @@ which would read text from file "input.txt", sort using about 20 megs of heap (n
 
 Project jar is packaged such that it can be used as a primitive 'sort' tool like so:
 
-    java -jar java-merge-sort-0.9.0.jar [input-file]
+    java -jar java-merge-sort-0.9.1.jar [input-file]
 
 where sorted output gets printed to `stdout`; and argument is optional (if missing, reads input from stdout).
 (implementation note: this uses standard `TextFileSorter` mentioned above)
