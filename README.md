@@ -7,6 +7,10 @@ It should be useful for systems that process large amounts of data, as a simple 
 
 Checkout [project wiki](https://github.com/cowtowncoder/java-merge-sort/wiki) for more documentation, including javadocs.
 
+# License
+
+Library is licensed under Apache License 2.0.
+
 # Usage
 
 ## Programmatic access
@@ -43,7 +47,7 @@ which would read text from file "input.txt", sort using about 20 megs of heap (n
 
 Project jar is packaged such that it can be used as a primitive 'sort' tool like so:
 
-    java -jar java-merge-sort-0.8.0.jar [input-file]
+    java -jar java-merge-sort-0.9.0.jar [input-file]
 
 where sorted output gets printed to `stdout`; and argument is optional (if missing, reads input from stdout).
 (implementation note: this uses standard `TextFileSorter` mentioned above)
@@ -60,6 +64,3 @@ Here are some external links:
 
 To access source, just clone [project](https://github.com/cowtowncoder/java-merge-sort)
 
-Benchmark code is licensed under Apache License 2.0.
-
-Note that as usual, license only covers (re)distribution of code, and does not apply to your own use of code (i.e. running tests locally), which you can do regardless of licensing.
