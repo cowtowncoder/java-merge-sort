@@ -80,5 +80,4 @@ public class TestLargeSort extends SortTestBase
         sorter.sort(new StringGenerator(STRING_COUNT, STRING_LENGTH), counter);
         assertEquals("sorted count", STRING_COUNT, counter.getCount());
     }
-
 }

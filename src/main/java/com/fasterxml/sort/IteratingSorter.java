@@ -148,34 +148,27 @@ public class IteratingSorter<T> extends SorterBase<T> implements Closeable
         private final DataReader<T> _merger;
         private T _next;
 
-        private MergerIterator(DataReader<T> merger) {
+        private MergerIterator(DataReader<T> merger) throws IOException {
             _merger = merger;
-        }
-
-        private void prepNext() {
-            if (_next != null) {
-                try {
-                    _next = _merger.readNext();
-                } catch (IOException e) {
-                    throw new IterableSorterException(e);
-                }
-            }
+            _next = _merger.readNext();
         }
 
         @Override
         public boolean hasNext() {
-            prepNext();
             return (_next != null);
         }
 
         @Override
         public T next() {
-            prepNext();
             if (_next == null) {
                 throw new NoSuchElementException();
             }
             T t = _next;
-            _next = null;
+            try {
+                _next = _merger.readNext();
+            } catch (IOException e) {
+                throw new IterableSorterException(e);
+            }
             return t;
         }
 
