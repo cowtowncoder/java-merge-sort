@@ -5,11 +5,11 @@ It should be useful for systems that process large amounts of data, as a simple 
 
 # Documentation 
 
-Checkout [project wiki](https://github.com/cowtowncoder/java-merge-sort/wiki) for more documentation, including javadocs.
+Checkout [project wiki](https://github.com/cowtowncoder/java-merge-sort/wiki) for more documentation, including Javadocs.
 
 # License
 
-Library is licensed under Apache License 2.0.
+Library is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
 # Usage
 
@@ -28,8 +28,10 @@ Fortunately implementing your own readers and writers is trivial.
 
 With a Sorter instance, you can call one of two main sort methods:
 
-    public void sort(InputStream source, OutputStream destination)
-    public boolean sort(DataReader<T>  inputReader, DataWriter<T> resultWriter)
+```java
+public void sort(InputStream source, OutputStream destination)
+public boolean sort(DataReader<T>  inputReader, DataWriter<T> resultWriter)
+```
 
 where former takes input as streams and uses configured reader/writer factories to construct `DataReader` for input and `DataWriter` for output; and latter just uses pre-constructed instances.
 
@@ -37,9 +39,10 @@ In addition to core sorting functionality, `Sorter` instance also gives access t
 
 A very simple example of sorting a text file using line-by-line comparison is:
 
-    TextSorter sorter = new TextFileSorter(new SortConfig().withMaxMemoryUsage(20 * 1000 * 1000));
-    sorter.sort(new FileInputStream("input.txt"),
-        new FileOutputStream("output.txt"));
+```java
+TextSorter sorter = new TextFileSorter(new SortConfig().withMaxMemoryUsage(20 * 1000 * 1000));
+sorter.sort(new FileInputStream("input.txt"), new FileOutputStream("output.txt"));
+```
 
 which would read text from file "input.txt", sort using about 20 megs of heap (note: estimates for memory usage are rough), use temporary files if necessary (i.e. for small files it's just in-memoryu sort, for bigger real merge sort), and write output as file "output.txt".
 
@@ -47,7 +50,9 @@ which would read text from file "input.txt", sort using about 20 megs of heap (n
 
 Project jar is packaged such that it can be used as a primitive 'sort' tool like so:
 
-    java -jar java-merge-sort-0.9.1.jar [input-file]
+```java
+java -jar java-merge-sort-1.0.0.jar [input-file]
+```
 
 where sorted output gets printed to `stdout`; and argument is optional (if missing, reads input from stdout).
 (implementation note: this uses standard `TextFileSorter` mentioned above)
