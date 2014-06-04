@@ -1,21 +1,20 @@
 Project: java-merge-sort
 License: Apache License 2.0
-Version: 0.9.1
-Release date: 12-Oct-2013
+Version: 1.0.0
+Release date: 04-Jun-2014
 
-0.9.1
-
-#11: Change more constructors to be public
- (contributed by Nathan W)
-#12: Fix an issue with implementation of #11
- (contributed by Nathan W)
+The first official non-beta release. No changes since 0.9.1.
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
 
-0.9.0 (10-Oct-2013)
+0.9.1 (12-Oct-2013)
 
+#11: Change more constructors to be public
+ (contributed by Nathan W)
+#12: Fix an issue with implementation of #11
+ (contributed by Nathan W)
 #10: Add Iterator-based (pull-style) sorter as an alternative
  (contributed by Nathan W)
 
@@ -23,9 +22,6 @@ Release date: 12-Oct-2013
 
 #8: Sorter._merge() not closing streams correctly
  (reported by tjoneslo@github)
-
-0.8.0 (24-Jul-2013)
-
 #6: Incorrect handling of '\r'
  (reported, patch contributed by ndikan@github.bom)
 
