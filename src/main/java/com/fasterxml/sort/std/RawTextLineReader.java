@@ -19,7 +19,7 @@ public class RawTextLineReader
     protected final InputStream _in;
 
     protected boolean _closed = false;
-    
+
     protected byte[] _inputBuffer = new byte[16000];
     protected int _inputPtr = 0;
     protected int _inputEnd = 0;
@@ -126,6 +126,7 @@ public class RawTextLineReader
                     break main_loop;
                 }
             }
+            bytes.write(_inputBuffer, 0, _inputEnd);
         }
         return bytes.toByteArray();
     }
@@ -167,7 +168,7 @@ public class RawTextLineReader
     /* Helper classes
     /**********************************************************************
      */
-    
+
     public static class Factory
         extends DataReaderFactory<byte[]>
     {

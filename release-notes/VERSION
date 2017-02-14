@@ -1,13 +1,18 @@
 Project: java-merge-sort
 License: Apache License 2.0
-Version: 1.0.0
-Release date: 04-Jun-2014
+Version: 1.0.1
+Release date: 14-Feb-2017
 
-The first official non-beta release. No changes since 0.9.1.
+#14: Long lines are corrupted when read by `RawTextLineReader._readNextSlow()`
+ (reported by Mathias H, hbs@github)
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
+
+1.0.0 (04-Jun-2014)
+
+The first official non-beta release. No changes since 0.9.1.
 
 0.9.1 (12-Oct-2013)
 
