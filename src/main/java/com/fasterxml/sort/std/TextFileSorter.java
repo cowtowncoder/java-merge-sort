@@ -94,5 +94,6 @@ public class TextFileSorter extends Sorter<byte[]>
             } 
         }).start();
         sorter.sort(in, System.out);
+        sorter.close();
     }
 }

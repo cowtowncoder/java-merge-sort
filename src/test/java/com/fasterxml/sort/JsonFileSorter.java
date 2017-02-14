@@ -2,9 +2,8 @@ package com.fasterxml.sort;
 
 import java.io.*;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.type.JavaType;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.*;
 
 import com.fasterxml.sort.std.StdComparator;
 
@@ -21,7 +20,7 @@ public class JsonFileSorter<T extends Comparable<T>> extends Sorter<T>
     public JsonFileSorter(JavaType entryType, SortConfig config, ObjectMapper mapper)
         throws IOException
     {
-        super(config, new ReaderFactory<T>(mapper.reader(entryType)),
+        super(config, new ReaderFactory<T>(mapper.readerFor(entryType)),
                 new WriterFactory<T>(mapper),
                 new StdComparator<T>());
     }
@@ -90,7 +89,7 @@ public class JsonFileSorter<T extends Comparable<T>> extends Sorter<T>
 
         public Writer(ObjectMapper mapper, OutputStream out) throws IOException {
             _mapper = mapper;
-            _generator = _mapper.getJsonFactory().createJsonGenerator(out);
+            _generator = _mapper.getFactory().createGenerator(out);
         }
 
         @Override
