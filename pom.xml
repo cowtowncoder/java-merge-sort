@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.fasterxml</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>16</version>
+    <version>24</version>
   </parent>
   <groupId>com.fasterxml.util</groupId>
   <artifactId>java-merge-sort</artifactId>
@@ -60,36 +60,19 @@
 
   <build>
     <plugins>
-<!--
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-release-plugin</artifactId>
-            <configuration>
-                <mavenExecutorId>forked-path</mavenExecutorId>
-            </configuration>
-        </plugin>
--->
-
-        <!-- 04-Jun-2014, tatu: Not sure why source and javadoc plugins are needed
-                here; parent pom SHOULD include enough info
-          -->
-        <plugin><!-- plug-in to attach source bundle in repo -->
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>2.1.2</version>
-            <executions>
-                <execution>
-                    <id>attach-sources</id>
-                    <goals>
-                        <goal>jar</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.6</version>
+            <version>${version.plugin.javadoc}</version>
+            <configuration>
+              <source>${version.jdk}</source>
+              <target>${version.jdk}</target>
+              <encoding>UTF-8</encoding>
+              <links>
+                <link>http://docs.oracle.com/javase/7/docs/api/</link>
+              </links>
+            </configuration>
+
             <executions>
                 <execution>
                     <id>attach-javadocs</id>
