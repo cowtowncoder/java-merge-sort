@@ -8,7 +8,7 @@
   <groupId>com.fasterxml.util</groupId>
   <artifactId>java-merge-sort</artifactId>
   <name>java-merge-sort</name>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <description>Basic configurable disk-backed N-way merge sort
   </description>
@@ -17,7 +17,7 @@
     <connection>scm:git:git@github.com:cowtowncoder/java-merge-sort.git</connection>
     <developerConnection>scm:git:git@github.com:cowtowncoder/java-merge-sort.git</developerConnection>
     <url>http://github.com/cowtowncoder/java-merge-sort</url>    
-    <tag>java-merge-sort-1.0.2</tag>
+    <tag>HEAD</tag>
   </scm>
   <developers>
     <developer>
