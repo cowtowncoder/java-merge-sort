@@ -94,8 +94,8 @@ public class IteratingSorter<T> extends SorterBase<T> implements Closeable
                     close();
                     return null;
                 }
-                _mergerInputs = presorted;
-                _merger = _createMergeReader(merge(presorted));
+                _mergerInputs = merge(presorted);
+                _merger = _createMergeReader(_mergerInputs);
                 iterator = new MergerIterator<T>(_merger);
             }
         } finally {
