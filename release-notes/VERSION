@@ -1,15 +1,19 @@
 Project: java-merge-sort
 License: Apache License 2.0
-Version: 1.0.2
-Release date: 2019-09-18
+Version:
+Release date:
 
-#16: Temp files that result from two-phase merge are not deleted
- (reported, fix contributed by John L)
-- Add `Automatic-Module-Name` of "com.fasterxml.sort"
+- Update `oss-parent` to 41 (for junit 4.13.1)
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
+
+1.0.2 (2019-09-18)
+
+#16: Temp files that result from two-phase merge are not deleted
+ (reported, fix contributed by John L)
+- Add `Automatic-Module-Name` of "com.fasterxml.sort"
 
 1.0.1 (2017-02-14)
 
