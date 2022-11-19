@@ -1,6 +1,7 @@
 package com.fasterxml.sort.std;
 
 import java.io.*;
+import java.nio.file.Files;
 
 import com.fasterxml.sort.TempFileProvider;
 
@@ -35,7 +36,7 @@ public class StdTempFileProvider
     @Override
     public File provide() throws IOException
     {
-        File f = File.createTempFile(_prefix, _suffix);
+        File f = Files.createTempFile(_prefix, _suffix).toFile();
         f.deleteOnExit();
         return f;
     }
