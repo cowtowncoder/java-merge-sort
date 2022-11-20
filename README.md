@@ -11,6 +11,12 @@ Checkout [project wiki](https://github.com/cowtowncoder/java-merge-sort/wiki) fo
 
 Library is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
+# JDK Requirement
+
+Version 1.1.0 (released on 2022-11-19) requires Java 8.
+
+Earlier versions (1.0.2 and before) require Java 6.
+
 # Usage
 
 ## Programmatic access
