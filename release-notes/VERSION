@@ -1,13 +1,18 @@
 Project: java-merge-sort
 License: Apache License 2.0
-Version:
-Release date:
-
-- Update `oss-parent` to 41 (for junit 4.13.1)
+Version: 1.1.0
+Release date: 2022-11-19
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
+
+1.1.0 (2022-11-19)
+
+#21: Fix Temporary File Information Disclosure Vulnerability
+ (contributed by Jonathan L)
+#22: Increase JDK baseline from Java 6 to Java 8
+- Update `oss-parent` to 48
 
 1.0.2 (2019-09-18)
 

@@ -18,3 +18,7 @@ Mathias Herberts (hbs@github)
 john lilley (wheezil@github)
   * Reported, contributed fix for #16: Temp files that result from two-phase merge are not deleted
    (1.0.2)
+
+Jonathan Leitschuh (JLLeitschuh@github)
+  * Contributed #21: Fix Temporary File Information Disclosure Vulnerability
+   (1.1.0)
