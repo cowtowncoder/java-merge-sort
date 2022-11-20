@@ -35,8 +35,8 @@
   </licenses>
 
   <properties>
-    <javac.src.version>1.6</javac.src.version>
-    <javac.target.version>1.6</javac.target.version>
+    <javac.src.version>1.8</javac.src.version>
+    <javac.target.version>1.8</javac.target.version>
 
       <!-- 1.0.2 adds "Automatic-Module-Name" for JDK 9 -->
       <jdk.module.name>com.fasterxml.sort</jdk.module.name>
